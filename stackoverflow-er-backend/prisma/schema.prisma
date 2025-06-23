@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  user_id    Int         @id
+  name       String
+  reputation Int?        @default(0)
+  link       String?
+  answers    Answers[]
+  comments   Comments[]
+  questions  Questions[]
+
+  @@map("users")
+}
+
+model Questions {
+  question_id   Int            @id
+  title         String?
+  is_answered   Boolean?
+  answer_count  Int?           @default(0)
+  view_count    Int?           @default(0)
+  creation_date DateTime?      @db.Date
+  score         Int?           @default(0)
+  user_id       Int?
+  answers       Answers[]
+  comments      Comments[]
+  question_tags QuestionTags[]
+  user          Users?         @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "questions_user_id_users_user_id_fk")
+
+  @@map("questions")
+}
+
+model Answers {
+  answers_id    Int        @id
+  body          String
+  creation_date DateTime?  @db.Date
+  score         Int?       @default(0)
+  is_accepted   Boolean?
+  user_id       Int?
+  question_id   Int?
+  question      Questions? @relation(fields: [question_id], references: [question_id], onDelete: NoAction, onUpdate: NoAction, map: "answers_question_id_questions_question_id_fk")
+  user          Users?     @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "answers_user_id_users_user_id_fk")
+  comments      Comments[]
+
+  @@map("answers")
+}
+
+model Comments {
+  comment_id    Int        @id
+  body          String?
+  creation_date DateTime?  @db.Date
+  user_id       Int?
+  answer_id     Int?
+  question_id   Int?
+  answer        Answers?   @relation(fields: [answer_id], references: [answers_id], onDelete: NoAction, onUpdate: NoAction, map: "comments_answer_id_answers_answers_id_fk")
+  question      Questions? @relation(fields: [question_id], references: [question_id], onDelete: NoAction, onUpdate: NoAction, map: "comments_question_id_questions_question_id_fk")
+  user          Users?     @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "comments_user_id_users_user_id_fk")
+
+  @@map("comments")
+}
+
+model Tags {
+  tag_id            Int            @id @default(autoincrement())
+  name              String
+  has_synonyms      Boolean?
+  is_moderator_only Boolean?
+  is_required       Boolean?
+  count             Int?           @default(0)
+  question_tags     QuestionTags[]
+
+  @@map("tags")
+}
+
+model QuestionTags {
+  question_id Int
+  tag_id      Int
+  question    Questions @relation(fields: [question_id], references: [question_id], onDelete: NoAction, onUpdate: NoAction, map: "question_tags_question_id_questions_question_id_fk")
+  tag         Tags      @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "question_tags_tag_id_tags_tag_id_fk")
+
+  @@id([question_id, tag_id], map: "question_tags_question_id_tag_id_pk")
+  @@map("question_tags")
+}
+
+model schema_migrations {
+  version BigInt  @id
+  dirty   Boolean
+}

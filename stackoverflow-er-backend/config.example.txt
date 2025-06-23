@@ -1,0 +1,9 @@
+# Crie um arquivo .env na raiz do projeto com o seguinte conteúdo:
+
+# Configuração do Banco de Dados PostgreSQL
+DATABASE_URL="postgresql://username:password@localhost:5432/stackoverflow"
+
+# Configuração do Servidor
+PORT=3001
+
+# Substitua username e password pelos dados do seu usuário do PostgreSQL 
