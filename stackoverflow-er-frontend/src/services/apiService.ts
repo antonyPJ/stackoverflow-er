@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { QueryBuilder, QueryResult } from '../types/ERTypes';
 
 // Configuração base da API
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
@@ -36,6 +37,23 @@ export const fetchEntityData = async (endpoint: string): Promise<any> => {
 };
 
 /**
+ * Executa uma consulta dinâmica
+ * @param queryBuilder - Objeto com a consulta montada
+ * @returns Promise com os resultados da consulta
+ */
+export const executeCustomQuery = async (queryBuilder: QueryBuilder): Promise<QueryResult> => {
+  try {
+    const response = await apiClient.post('/api/custom-query', queryBuilder);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao executar consulta customizada:', error);
+    
+    // Para demonstração, retornar dados mock se o endpoint não estiver disponível
+    return getMockQueryResult(queryBuilder);
+  }
+};
+
+/**
  * Dados mock para demonstração quando a API não estiver disponível
  */
 const getMockDataForEndpoint = (endpoint: string): any => {
@@ -59,6 +77,50 @@ const getMockDataForEndpoint = (endpoint: string): any => {
   };
 
   return mockData[endpoint] || { message: 'Dados não encontrados para este endpoint' };
+};
+
+/**
+ * Resultado mock para consultas dinâmicas
+ */
+const getMockQueryResult = (queryBuilder: QueryBuilder): QueryResult => {
+  const columns = queryBuilder.selectedFields.map(field => field.name);
+  
+  // Gerar dados mock baseados nas tabelas selecionadas
+  const mockData = [];
+  
+  if (queryBuilder.selectedTables.includes('users') && queryBuilder.selectedTables.includes('questions')) {
+    mockData.push(
+      { id: 1, name: 'João Silva', title: 'Como usar React Hooks?', score: 5 },
+      { id: 2, name: 'Maria Santos', title: 'TypeScript vs JavaScript', score: 3 },
+      { id: 3, name: 'Pedro Costa', title: 'Node.js performance tips', score: 7 }
+    );
+  } else if (queryBuilder.selectedTables.includes('users')) {
+    mockData.push(
+      { id: 1, name: 'João Silva', reputation: 1250 },
+      { id: 2, name: 'Maria Santos', reputation: 890 },
+      { id: 3, name: 'Pedro Costa', reputation: 2100 }
+    );
+  } else if (queryBuilder.selectedTables.includes('questions')) {
+    mockData.push(
+      { id: 1, title: 'Como usar React Hooks?', score: 5, views: 150 },
+      { id: 2, title: 'TypeScript vs JavaScript', score: 3, views: 89 },
+      { id: 3, title: 'Node.js performance tips', score: 7, views: 234 }
+    );
+  } else {
+    // Dados genéricos
+    mockData.push(
+      { id: 1, name: 'Item 1', value: 100 },
+      { id: 2, name: 'Item 2', value: 200 },
+      { id: 3, name: 'Item 3', value: 300 }
+    );
+  }
+
+  return {
+    data: mockData,
+    columns,
+    rowCount: mockData.length,
+    executionTime: 0.15
+  };
 };
 
 export default apiClient;
