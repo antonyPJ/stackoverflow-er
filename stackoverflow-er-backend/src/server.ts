@@ -1,10 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
-import usersRoutes from './routes/usersRoutes';
-import questionsRoutes from './routes/questionsRoutes';
-import answersRoutes from './routes/answersRoutes';
-import statsRoutes from './routes/statsRoutes';
+import customQueryRoutes from './routes/customQueryRoutes';
 
 const app = express();
 export const prisma = new PrismaClient();
@@ -30,17 +27,11 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Rotas da API
-app.use('/api/users', usersRoutes);
-app.use('/api/questions', questionsRoutes);
-app.use('/api/answers', answersRoutes);
-app.use('/api/stats', statsRoutes);
+app.use('/api/custom-query', customQueryRoutes);
 
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
   console.log(`📊 API disponível em http://localhost:${PORT}`);
-  console.log(`👥 Usuários: http://localhost:${PORT}/api/users`);
-  console.log(`❓ Perguntas: http://localhost:${PORT}/api/questions`);
-  console.log(`💬 Respostas: http://localhost:${PORT}/api/answers`);
-  console.log(`📈 Estatísticas: http://localhost:${PORT}/api/stats`);
+  console.log(`🔍 Consultas Customizadas: http://localhost:${PORT}/api/custom-query`);
 }); 

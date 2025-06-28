@@ -7,12 +7,10 @@ export const mockEntities: Entity[] = [
     displayName: 'Users',
     position: { x: 600, y: 100 },
     color: '#4CAF50',
-    apiEndpoint: '/api/users',
     attributes: [
       { name: 'user_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
       { name: 'name', type: 'VARCHAR(50)', isRequired: true },
       { name: 'reputation', type: 'INTEGER', isRequired: true },
-      // outros atributos podem ser adicionados aqui
     ],
   },
   {
@@ -21,7 +19,6 @@ export const mockEntities: Entity[] = [
     displayName: 'Questions',
     position: { x: 400, y: 250 },
     color: '#FF9800',
-    apiEndpoint: '/api/questions',
     attributes: [
       { name: 'question_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
       { name: 'title', type: 'VARCHAR(255)', isRequired: true },
@@ -36,9 +33,8 @@ export const mockEntities: Entity[] = [
     displayName: 'Answers',
     position: { x: 600, y: 400 },
     color: '#9C27B0',
-    apiEndpoint: '/api/answers',
     attributes: [
-      { name: 'answer_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
+      { name: 'answers_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
       { name: 'body', type: 'TEXT', isRequired: true },
       { name: 'creation_date', type: 'TIMESTAMP', isRequired: true },
       { name: 'user_id', type: 'INTEGER', isForeignKey: true, isRequired: true },
@@ -51,7 +47,6 @@ export const mockEntities: Entity[] = [
     displayName: 'Comments',
     position: { x: 400, y: 550 },
     color: '#F44336',
-    apiEndpoint: '/api/comments',
     attributes: [
       { name: 'comment_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
       { name: 'body', type: 'TEXT', isRequired: true },
@@ -67,10 +62,9 @@ export const mockEntities: Entity[] = [
     displayName: 'Tags',
     position: { x: 100, y: 300 },
     color: '#607D8B',
-    apiEndpoint: '/api/tags',
     attributes: [
       { name: 'tag_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
-      { name: 'tag_name', type: 'VARCHAR(50)', isRequired: true },
+      { name: 'name', type: 'VARCHAR(50)', isRequired: true },
     ],
   },
   {
@@ -79,7 +73,6 @@ export const mockEntities: Entity[] = [
     displayName: 'Question Tags',
     position: { x: 200, y: 450 },
     color: '#795548',
-    apiEndpoint: '/api/question-tags',
     attributes: [
       { name: 'question_id', type: 'INTEGER', isPrimaryKey: true, isForeignKey: true, isRequired: true },
       { name: 'tag_id', type: 'INTEGER', isPrimaryKey: true, isForeignKey: true, isRequired: true },

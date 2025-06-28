@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { useER } from '../../contexts/ERContext';
 
@@ -24,10 +24,12 @@ const StatsContainer = styled.div`
   padding: 15px;
   background-color: #333;
   border-radius: 8px;
+  flex-wrap: wrap;
 `;
 
 const StatItem = styled.div`
   text-align: center;
+  min-width: 80px;
 `;
 
 const StatValue = styled.div`
@@ -46,14 +48,18 @@ const TableContainer = styled.div`
   background-color: #333;
   border-radius: 8px;
   overflow: hidden;
-  max-height: 400px;
+  max-height: 800px;
+  min-height: 200px;
   overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
+  min-width: 600px;
 `;
 
 const TableHeader = styled.thead`
@@ -69,6 +75,11 @@ const TableHeaderCell = styled.th`
   border-bottom: 2px solid #555;
   font-weight: bold;
   color: #fff;
+  white-space: nowrap;
+  min-width: 100px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const TableBody = styled.tbody``;
@@ -87,9 +98,11 @@ const TableCell = styled.td`
   padding: 8px;
   border-bottom: 1px solid #444;
   max-width: 200px;
+  min-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  vertical-align: top;
 `;
 
 const NoResults = styled.div`
@@ -105,8 +118,36 @@ const LoadingSpinner = styled.div`
   color: #4CAF50;
 `;
 
+const ScrollIndicator = styled.div`
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  z-index: 10;
+`;
+
 const QueryResults: React.FC = () => {
   const { queryResult, isQueryLoading } = useER();
+  const [hasHorizontalScroll, setHasHorizontalScroll] = useState(false);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkScroll = () => {
+      if (tableContainerRef.current) {
+        const hasScroll = tableContainerRef.current.scrollWidth > tableContainerRef.current.clientWidth;
+        setHasHorizontalScroll(hasScroll);
+      }
+    };
+
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [queryResult]);
 
   if (isQueryLoading) {
     return (
@@ -151,12 +192,12 @@ const QueryResults: React.FC = () => {
         )}
       </StatsContainer>
 
-      <TableContainer>
+      <TableContainer ref={tableContainerRef}>
         <Table>
           <TableHeader>
             <tr>
               {queryResult.columns.map((column, index) => (
-                <TableHeaderCell key={index}>
+                <TableHeaderCell key={index} title={column}>
                   {column}
                 </TableHeaderCell>
               ))}
@@ -166,7 +207,7 @@ const QueryResults: React.FC = () => {
             {queryResult.data.map((row, rowIndex) => (
               <TableRow key={rowIndex}>
                 {queryResult.columns.map((column, colIndex) => (
-                  <TableCell key={colIndex}>
+                  <TableCell key={colIndex} title={String(row[column] || '')}>
                     {row[column] !== null && row[column] !== undefined 
                       ? String(row[column])
                       : <span style={{ color: '#666', fontStyle: 'italic' }}>null</span>
@@ -177,6 +218,11 @@ const QueryResults: React.FC = () => {
             ))}
           </TableBody>
         </Table>
+        {hasHorizontalScroll && (
+          <ScrollIndicator>
+            ← Arraste horizontalmente para ver mais colunas →
+          </ScrollIndicator>
+        )}
       </TableContainer>
     </ResultsContainer>
   );

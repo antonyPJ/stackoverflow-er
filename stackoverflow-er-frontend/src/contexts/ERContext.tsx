@@ -74,8 +74,110 @@ export const ERProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const addTable = (tableName: string) => {
     if (!selectedTables.includes(tableName)) {
       setSelectedTables([...selectedTables, tableName]);
+      // Adicionar JOIN automaticamente se houver relação
+      if (selectedTables.length > 0) {
+        // Procurar relação entre a nova tabela e as já selecionadas
+        for (const existingTable of selectedTables) {
+          const rel = mockRelationships.find(r =>
+            (r.fromEntity.toLowerCase() === existingTable.toLowerCase() && r.toEntity.toLowerCase() === tableName.toLowerCase()) ||
+            (r.toEntity.toLowerCase() === existingTable.toLowerCase() && r.fromEntity.toLowerCase() === tableName.toLowerCase())
+          );
+          if (rel) {
+            // Criar JOIN baseado na relação real entre as tabelas
+            const join = createJoinFromRelationship(rel, existingTable, tableName);
+            if (join && !joins.find(j => j.id === join.id)) {
+              setJoins([...joins, join]);
+            }
+            break;
+          }
+        }
+      }
     }
   };
+  
+  // Função para criar JOIN baseado na relação real
+  function createJoinFromRelationship(rel: Relationship, table1: string, table2: string): Join | null {
+    // Mapeamento de campos para JOINs baseado nas relações reais
+    const joinMappings: { [key: string]: { [key: string]: { fromField: string; toField: string } } } = {
+      'questions': {
+        'answers': { fromField: 'question_id', toField: 'question_id' },
+        'users': { fromField: 'user_id', toField: 'user_id' },
+        'comments': { fromField: 'question_id', toField: 'question_id' },
+        'question_tags': { fromField: 'question_id', toField: 'question_id' }
+      },
+      'answers': {
+        'questions': { fromField: 'question_id', toField: 'question_id' },
+        'users': { fromField: 'user_id', toField: 'user_id' },
+        'comments': { fromField: 'answers_id', toField: 'answer_id' }
+      },
+      'users': {
+        'questions': { fromField: 'user_id', toField: 'user_id' },
+        'answers': { fromField: 'user_id', toField: 'user_id' },
+        'comments': { fromField: 'user_id', toField: 'user_id' }
+      },
+      'comments': {
+        'questions': { fromField: 'question_id', toField: 'question_id' },
+        'answers': { fromField: 'answer_id', toField: 'answers_id' },
+        'users': { fromField: 'user_id', toField: 'user_id' }
+      },
+      'tags': {
+        'question_tags': { fromField: 'tag_id', toField: 'tag_id' }
+      },
+      'question_tags': {
+        'questions': { fromField: 'question_id', toField: 'question_id' },
+        'tags': { fromField: 'tag_id', toField: 'tag_id' }
+      }
+    };
+
+    // Determinar qual tabela é a origem e qual é o destino
+    let fromTable: string, toTable: string;
+    if (rel.fromEntity.toLowerCase() === table1.toLowerCase()) {
+      fromTable = table1;
+      toTable = table2;
+    } else if (rel.toEntity.toLowerCase() === table1.toLowerCase()) {
+      fromTable = table2;
+      toTable = table1;
+    } else {
+      // Se não conseguir determinar, usar a primeira tabela como origem
+      fromTable = table1;
+      toTable = table2;
+    }
+
+    // Buscar o mapeamento de campos
+    const mapping = joinMappings[fromTable.toLowerCase()]?.[toTable.toLowerCase()];
+    if (!mapping) {
+      // Tentar o mapeamento reverso
+      const reverseMapping = joinMappings[toTable.toLowerCase()]?.[fromTable.toLowerCase()];
+      if (reverseMapping) {
+        return {
+          id: `${fromTable.toLowerCase()}-${toTable.toLowerCase()}`,
+          fromTable: fromTable.toLowerCase(),
+          toTable: toTable.toLowerCase(),
+          fromField: reverseMapping.toField,
+          toField: reverseMapping.fromField,
+          type: 'LEFT',
+        };
+      }
+      return null;
+    }
+
+    return {
+      id: `${fromTable.toLowerCase()}-${toTable.toLowerCase()}`,
+      fromTable: fromTable.toLowerCase(),
+      toTable: toTable.toLowerCase(),
+      fromField: mapping.fromField,
+      toField: mapping.toField,
+      type: 'LEFT',
+    };
+  }
+  
+  // Função auxiliar para pegar a PK da entidade
+  function getFirstPK(entityName: string): string {
+    const entity = mockEntities.find(e => e.name.toLowerCase() === entityName.toLowerCase());
+    if (!entity) return 'id';
+    const pk = entity.attributes.find(attr => attr.isPrimaryKey);
+    return pk ? pk.name : 'id';
+  }
   
   const removeTable = (tableName: string) => {
     setSelectedTables(selectedTables.filter(t => t !== tableName));

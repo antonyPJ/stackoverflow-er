@@ -2,7 +2,7 @@ import axios from 'axios';
 import { QueryBuilder, QueryResult } from '../types/ERTypes';
 
 // Configuração base da API
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -43,13 +43,104 @@ export const fetchEntityData = async (endpoint: string): Promise<any> => {
  */
 export const executeCustomQuery = async (queryBuilder: QueryBuilder): Promise<QueryResult> => {
   try {
-    const response = await apiClient.post('/api/custom-query', queryBuilder);
+    console.log('Enviando consulta para o backend:', JSON.stringify(queryBuilder, null, 2));
+    
+    const response = await apiClient.post('/api/custom-query/execute', queryBuilder);
+    console.log('Resposta do backend:', response.data);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao executar consulta customizada:', error);
+    
+    // Log detalhado do erro
+    if (error.response) {
+      console.error('Status do erro:', error.response.status);
+      console.error('Dados do erro:', error.response.data);
+    }
     
     // Para demonstração, retornar dados mock se o endpoint não estiver disponível
     return getMockQueryResult(queryBuilder);
+  }
+};
+
+/**
+ * Valida uma consulta antes da execução
+ * @param queryBuilder - Objeto com a consulta montada
+ * @returns Promise com os resultados da validação
+ */
+export const validateCustomQuery = async (queryBuilder: QueryBuilder): Promise<{
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  suggestedJoins: any[];
+  connectivity: { isConnected: boolean; disconnectedTables: string[] };
+}> => {
+  try {
+    console.log('Validando consulta:', JSON.stringify(queryBuilder, null, 2));
+    
+    const response = await apiClient.post('/api/custom-query/validate', queryBuilder);
+    console.log('Resposta da validação:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao validar consulta:', error);
+    
+    // Log detalhado do erro
+    if (error.response) {
+      console.error('Status do erro:', error.response.status);
+      console.error('Dados do erro:', error.response.data);
+    }
+    
+    // Retornar erro de validação mock
+    return {
+      isValid: false,
+      errors: ['Erro de conexão com o servidor'],
+      warnings: [],
+      suggestedJoins: [],
+      connectivity: { isConnected: false, disconnectedTables: [] }
+    };
+  }
+};
+
+/**
+ * Gera JOINs automáticos quando uma nova tabela é selecionada
+ * @param newTable - Nova tabela selecionada
+ * @param existingTables - Tabelas já selecionadas
+ * @param existingJoins - JOINs já existentes
+ * @returns Promise com os JOINs automáticos gerados
+ */
+export const generateAutomaticJoins = async (
+  newTable: string, 
+  existingTables: string[], 
+  existingJoins: any[] = []
+): Promise<{
+  newJoins: any[];
+  optimizedJoins: any[];
+  message: string;
+}> => {
+  try {
+    console.log('Gerando JOINs automáticos para:', newTable);
+    
+    const response = await apiClient.post('/api/custom-query/auto-joins', {
+      newTable,
+      existingTables,
+      existingJoins
+    });
+    
+    console.log('JOINs automáticos gerados:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Erro ao gerar JOINs automáticos:', error);
+    
+    if (error.response) {
+      console.error('Status do erro:', error.response.status);
+      console.error('Dados do erro:', error.response.data);
+    }
+    
+    // Retornar resposta de erro
+    return {
+      newJoins: [],
+      optimizedJoins: existingJoins,
+      message: 'Erro ao gerar JOINs automáticos'
+    };
   }
 };
 
@@ -59,20 +150,25 @@ export const executeCustomQuery = async (queryBuilder: QueryBuilder): Promise<Qu
 const getMockDataForEndpoint = (endpoint: string): any => {
   const mockData: { [key: string]: any } = {
     '/api/users': [
-      { id: 1, username: 'john_doe', email: 'john@example.com', reputation: 1250, created_at: '2023-01-15' },
-      { id: 2, username: 'jane_smith', email: 'jane@example.com', reputation: 890, created_at: '2023-02-20' },
+      { user_id: 1, name: 'john_doe', reputation: 1250, created_at: '2023-01-15' },
+      { user_id: 2, name: 'jane_smith', reputation: 890, created_at: '2023-02-20' },
     ],
     '/api/questions': [
-      { id: 1, user_id: 1, views: 150, score: 5, title: 'Como usar React Hooks?' },
-      { id: 2, user_id: 2, views: 89, score: 3, title: 'TypeScript vs JavaScript' },
+      { question_id: 1, user_id: 1, views: 150, score: 5, title: 'Como usar React Hooks?' },
+      { question_id: 2, user_id: 2, views: 89, score: 3, title: 'TypeScript vs JavaScript' },
     ],
     '/api/answers': [
-      { id: 1, question_id: 1, user_id: 2, is_accepted: true, score: 8 },
-      { id: 2, question_id: 1, user_id: 1, is_accepted: false, score: 2 },
+      { answers_id: 1, question_id: 1, user_id: 2, is_accepted: true, score: 8 },
+      { answers_id: 2, question_id: 1, user_id: 1, is_accepted: false, score: 2 },
     ],
     '/api/tags': [
-      { id: 1, name: 'react', description: 'React JavaScript library', usage_count: 1250 },
-      { id: 2, name: 'typescript', description: 'TypeScript programming language', usage_count: 890 },
+      { tag_id: 1, name: 'react', description: 'React JavaScript library', usage_count: 1250 },
+      { tag_id: 2, name: 'typescript', description: 'TypeScript programming language', usage_count: 890 },
+    ],
+    '/api/question_tags': [
+      { question_id: 1, tag_id: 1 },
+      { question_id: 1, tag_id: 2 },
+      { question_id: 2, tag_id: 2 },
     ],
   };
 

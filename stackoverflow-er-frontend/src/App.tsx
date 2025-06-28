@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import ERDiagram from './components/ERDiagram/ERDiagram';
 import EntityDetails from './components/EntityDetails/EntityDetails';
@@ -20,14 +20,35 @@ const DiagramContainer = styled.div`
   position: relative;
 `;
 
-const SidebarContainer = styled.div`
-  width: 500px;
+const SidebarContainer = styled.div<{ width: number }>`
+  width: ${props => props.width}px;
+  min-width: 350px;
+  max-width: 1000px;
   background-color: #2d2d2d;
   border-left: 1px solid #444;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-width: 500px;
+  position: relative;
+`;
+
+const ResizeHandle = styled.div`
+  position: absolute;
+  left: -3px;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  background-color: transparent;
+  cursor: col-resize;
+  z-index: 1000;
+  
+  &:hover {
+    background-color: #4CAF50;
+  }
+  
+  &:active {
+    background-color: #45a049;
+  }
 `;
 
 const TabContainer = styled.div`
@@ -81,6 +102,42 @@ const InstructionsText = styled.div`
 
 function App() {
   const [activeTab, setActiveTab] = useState<'details' | 'query' | 'results'>('details');
+  const [sidebarWidth, setSidebarWidth] = useState(500);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isResizing && sidebarRef.current) {
+        const newWidth = window.innerWidth - e.clientX;
+        const clampedWidth = Math.max(350, Math.min(1000, newWidth));
+        setSidebarWidth(clampedWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing]);
+
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
 
   return (
     <ERProvider>
@@ -93,12 +150,14 @@ function App() {
             <InstructionsText>
               • <strong>Clique simples:</strong> Seleciona entidade para ver detalhes<br/>
               • <strong>Ctrl+Clique:</strong> Adiciona/remove tabela da consulta<br/>
-              • <strong>Abas laterais:</strong> Monte consultas e veja resultados
+              • <strong>Abas laterais:</strong> Monte consultas e veja resultados<br/>
+              • <strong>Arraste a borda:</strong> Redimensione a aba lateral
             </InstructionsText>
           </Instructions>
         </DiagramContainer>
         
-        <SidebarContainer>
+        <SidebarContainer ref={sidebarRef} width={sidebarWidth}>
+          <ResizeHandle onMouseDown={handleResizeStart} />
           <TabContainer>
             <Tab 
               isActive={activeTab === 'details'} 
