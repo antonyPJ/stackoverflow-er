@@ -40,7 +40,6 @@ export const mockEntities: Entity[] = [
       { name: 'body', type: 'TEXT', isRequired: true },
       { name: 'creation_date', type: 'DATE', isRequired: false },
       { name: 'score', type: 'INTEGER', isRequired: false },
-      { name: 'is_accepted', type: 'BOOLEAN', isRequired: false },
       { name: 'user_id', type: 'INTEGER', isForeignKey: true, isRequired: false },
       { name: 'question_id', type: 'INTEGER', isForeignKey: true, isRequired: false },
     ],
