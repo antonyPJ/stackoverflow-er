@@ -175,10 +175,17 @@ class SQLQueryBuilder {
 
     const column = `${table}.${field}`;
     
+    // Verificar se é um campo de data
+    const isDateField = field.toLowerCase().includes('creation_date') || 
+                       field.toLowerCase().includes('date');
+    
     switch (filter.operator) {
       case '=':
         if (filter.value === null || filter.value === 'NULL') {
           return `${column} IS NULL`;
+        }
+        if (isDateField) {
+          return `${column} = ${this.addParameter(filter.value)}::date`;
         }
         return `${column} = ${this.addParameter(filter.value)}`;
       
@@ -186,18 +193,33 @@ class SQLQueryBuilder {
         if (filter.value === null || filter.value === 'NULL') {
           return `${column} IS NOT NULL`;
         }
+        if (isDateField) {
+          return `${column} != ${this.addParameter(filter.value)}::date`;
+        }
         return `${column} != ${this.addParameter(filter.value)}`;
       
       case '>':
+        if (isDateField) {
+          return `${column} > ${this.addParameter(filter.value)}::date`;
+        }
         return `${column} > ${this.addParameter(filter.value)}`;
       
       case '<':
+        if (isDateField) {
+          return `${column} < ${this.addParameter(filter.value)}::date`;
+        }
         return `${column} < ${this.addParameter(filter.value)}`;
       
       case '>=':
+        if (isDateField) {
+          return `${column} >= ${this.addParameter(filter.value)}::date`;
+        }
         return `${column} >= ${this.addParameter(filter.value)}`;
       
       case '<=':
+        if (isDateField) {
+          return `${column} <= ${this.addParameter(filter.value)}::date`;
+        }
         return `${column} <= ${this.addParameter(filter.value)}`;
       
       case 'LIKE':

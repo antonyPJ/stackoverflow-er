@@ -22,9 +22,11 @@ export const mockEntities: Entity[] = [
     attributes: [
       { name: 'question_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
       { name: 'title', type: 'VARCHAR(255)', isRequired: true },
-      { name: 'body', type: 'TEXT', isRequired: true },
-      { name: 'creation_date', type: 'TIMESTAMP', isRequired: true },
-      { name: 'user_id', type: 'INTEGER', isForeignKey: true, isRequired: true },
+      { name: 'answer_count', type: 'INTEGER', isRequired: false },
+      { name: 'view_count', type: 'INTEGER', isRequired: false },
+      { name: 'creation_date', type: 'DATE', isRequired: false },
+      { name: 'score', type: 'INTEGER', isRequired: false },
+      { name: 'user_id', type: 'INTEGER', isForeignKey: true, isRequired: false },
     ],
   },
   {
@@ -36,9 +38,11 @@ export const mockEntities: Entity[] = [
     attributes: [
       { name: 'answers_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
       { name: 'body', type: 'TEXT', isRequired: true },
-      { name: 'creation_date', type: 'TIMESTAMP', isRequired: true },
-      { name: 'user_id', type: 'INTEGER', isForeignKey: true, isRequired: true },
-      { name: 'question_id', type: 'INTEGER', isForeignKey: true, isRequired: true },
+      { name: 'creation_date', type: 'DATE', isRequired: false },
+      { name: 'score', type: 'INTEGER', isRequired: false },
+      { name: 'is_accepted', type: 'BOOLEAN', isRequired: false },
+      { name: 'user_id', type: 'INTEGER', isForeignKey: true, isRequired: false },
+      { name: 'question_id', type: 'INTEGER', isForeignKey: true, isRequired: false },
     ],
   },
   {
@@ -49,11 +53,11 @@ export const mockEntities: Entity[] = [
     color: '#F44336',
     attributes: [
       { name: 'comment_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
-      { name: 'body', type: 'TEXT', isRequired: true },
-      { name: 'creation_date', type: 'TIMESTAMP', isRequired: true },
-      { name: 'user_id', type: 'INTEGER', isForeignKey: true, isRequired: true },
-      { name: 'question_id', type: 'INTEGER', isForeignKey: true },
-      { name: 'answer_id', type: 'INTEGER', isForeignKey: true },
+      { name: 'body', type: 'TEXT', isRequired: false },
+      { name: 'creation_date', type: 'DATE', isRequired: false },
+      { name: 'user_id', type: 'INTEGER', isForeignKey: true, isRequired: false },
+      { name: 'answer_id', type: 'INTEGER', isForeignKey: true, isRequired: false },
+      { name: 'question_id', type: 'INTEGER', isForeignKey: true, isRequired: false },
     ],
   },
   {
@@ -64,7 +68,8 @@ export const mockEntities: Entity[] = [
     color: '#607D8B',
     attributes: [
       { name: 'tag_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
-      { name: 'name', type: 'VARCHAR(50)', isRequired: true },
+      { name: 'name', type: 'TEXT', isRequired: true },
+      { name: 'count', type: 'INTEGER', isRequired: false },
     ],
   },
   {

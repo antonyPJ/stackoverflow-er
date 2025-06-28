@@ -594,6 +594,13 @@ const QueryBuilder: React.FC = () => {
   };
 
   const isDateField = (fieldName: string) => {
+    const field = selectedFields.find(f => `${f.table}.${f.name}` === fieldName);
+    if (field) {
+      return field.type.toLowerCase().includes('date') || 
+             field.type.toLowerCase().includes('datetime') ||
+             field.name.toLowerCase().includes('creation_date') || 
+             field.name.toLowerCase().includes('date');
+    }
     return fieldName.toLowerCase().includes('creation_date') || 
            fieldName.toLowerCase().includes('date');
   };
@@ -611,6 +618,10 @@ const QueryBuilder: React.FC = () => {
   const getStringOperators = () => [
     { value: '=', label: '=' },
     { value: '!=', label: '!=' },
+    { value: '>', label: '>' },
+    { value: '<', label: '<' },
+    { value: '>=', label: '>=' },
+    { value: '<=', label: '<=' },
     { value: 'LIKE', label: 'LIKE' },
     { value: 'IS NULL', label: 'IS NULL' },
     { value: 'IS NOT NULL', label: 'IS NOT NULL' }
