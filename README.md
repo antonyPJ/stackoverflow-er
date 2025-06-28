@@ -302,7 +302,3 @@ const result = await response.json();
 - **Índices**: Uso de índices em chaves primárias e estrangeiras
 - **Limitação**: Controle de quantidade de resultados
 - **Cache**: Cache de configurações de schema
-
----
-
-**StackOverflow ER** - Transformando dados em insights visuais! 🚀 
