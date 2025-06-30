@@ -2,6 +2,21 @@
 
 Um sistema completo para visualização e consulta de dados do StackOverflow com interface gráfica de diagrama ER e construtor de consultas dinâmicas.
 
+## ⚠️ Aviso Importante sobre Obtenção de Dados
+
+**Este projeto utiliza dados obtidos através de engenharia reversa da API do StackOverflow.**
+
+Os dados utilizados nesta aplicação são obtidos através da API disponível em: [https://github.com/el-yawd/stackoverflow/tree/main/api](https://github.com/el-yawd/stackoverflow/tree/main/api)
+
+Esta API realiza engenharia reversa dos dados oficiais do StackOverflow para popular o banco de dados local. **Este projeto é apenas uma interface de consulta e visualização** - não possui funcionalidades de coleta ou engenharia reversa de dados.
+
+### 📋 Responsabilidades
+- **Interface de Consulta**: Este projeto fornece apenas a interface para consultar dados já coletados
+- **Coleta de Dados**: A coleta e engenharia reversa são responsabilidade da API mencionada acima
+- **Uso Educacional**: Este projeto é destinado a fins educacionais e de demonstração
+
+---
+
 ## 🚀 Funcionalidades
 
 ### ✨ Interface Principal
