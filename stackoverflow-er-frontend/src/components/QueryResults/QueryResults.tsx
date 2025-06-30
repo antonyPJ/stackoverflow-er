@@ -392,9 +392,10 @@ const QueryResults: React.FC = () => {
           </TableBody>
         </Table>
         {hasHorizontalScroll && (
-          <ScrollIndicator>
-            ← Arraste horizontalmente para ver mais colunas →
-          </ScrollIndicator>
+          // <ScrollIndicator>
+          //   ← Arraste horizontalmente para ver mais colunas →
+          // </ScrollIndicator>
+          null
         )}
       </TableContainer>
     </ResultsContainer>
