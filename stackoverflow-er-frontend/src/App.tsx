@@ -151,7 +151,10 @@ function App() {
               • <strong>Clique simples:</strong> Seleciona entidade para ver detalhes<br/>
               • <strong>Ctrl+Clique:</strong> Adiciona/remove tabela da consulta<br/>
               • <strong>Abas laterais:</strong> Monte consultas e veja resultados<br/>
-              • <strong>Arraste a borda:</strong> Redimensione a aba lateral
+              • <strong>Arraste a borda:</strong> Redimensione a aba lateral<br/>
+              • <strong>🖱️ Arraste:</strong> Mova o diagrama na tela<br/>
+              • <strong>⌨️ Ctrl+Scroll:</strong> Zoom in/out no diagrama<br/>
+              • <strong>🖱️ Duplo clique:</strong> Centraliza o diagrama
             </InstructionsText>
           </Instructions>
         </DiagramContainer>

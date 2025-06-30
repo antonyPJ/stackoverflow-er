@@ -5,7 +5,7 @@ export const mockEntities: Entity[] = [
     id: 'users',
     name: 'USERS',
     displayName: 'Users',
-    position: { x: 600, y: 100 },
+    position: { x: 600, y: 160 },
     color: '#4CAF50',
     attributes: [
       { name: 'user_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
@@ -48,7 +48,7 @@ export const mockEntities: Entity[] = [
     id: 'comments',
     name: 'COMMENTS',
     displayName: 'Comments',
-    position: { x: 400, y: 550 },
+    position: { x: 400, y: 480 },
     color: '#F44336',
     attributes: [
       { name: 'comment_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },
@@ -63,7 +63,7 @@ export const mockEntities: Entity[] = [
     id: 'tags',
     name: 'TAGS',
     displayName: 'Tags',
-    position: { x: 100, y: 300 },
+    position: { x: 200, y: 300 },
     color: '#607D8B',
     attributes: [
       { name: 'tag_id', type: 'INTEGER', isPrimaryKey: true, isRequired: true },

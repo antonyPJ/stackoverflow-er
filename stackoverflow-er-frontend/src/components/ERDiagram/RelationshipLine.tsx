@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Relationship, Entity } from '../../types/ERTypes';
+import { labelOffsets } from '../../data/labelOffsets';
 
 interface RelationshipLineProps {
   relationship: Relationship;
@@ -25,17 +26,18 @@ const Line = styled.div<{ width: number; angle: number; left: number; top: numbe
   top: ${props => props.top}px;
 `;
 
-const Label = styled.div<{ left: number; top: number }>`
+const Label = styled.div<{ left: number; top: number; customOffset?: { x: number; y: number } }>`
   position: absolute;
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10px;
-  left: ${props => props.left}px;
-  top: ${props => props.top}px;
+  left: ${props => props.left + (props.customOffset?.x || 0)}px;
+  top: ${props => props.top + (props.customOffset?.y || 0)}px;
   transform: translate(-50%, -50%);
   white-space: nowrap;
+  z-index: 15;
 `;
 
 const Cardinality = styled.div<{ left: number; top: number }>`
@@ -81,6 +83,13 @@ const RelationshipLine: React.FC<RelationshipLineProps> = ({ relationship, entit
   const toCardX = fromCenter.x + deltaX * 0.8;
   const toCardY = fromCenter.y + deltaY * 0.8;
 
+  // Offset personalizado para cada label (você pode modificar estes valores)
+  const getLabelOffset = (relationshipId: string): { x: number; y: number } => {
+    return labelOffsets[relationshipId] || { x: 0, y: 0 };
+  };
+
+  const labelOffset = getLabelOffset(relationship.id);
+
   return (
     <LineContainer>
       <Line
@@ -89,7 +98,7 @@ const RelationshipLine: React.FC<RelationshipLineProps> = ({ relationship, entit
         left={fromCenter.x}
         top={fromCenter.y}
       />
-      <Label left={midX} top={midY}>
+      <Label left={midX} top={midY} customOffset={labelOffset}>
         {relationship.label}
       </Label>
       <Cardinality left={fromCardX} top={fromCardY}>

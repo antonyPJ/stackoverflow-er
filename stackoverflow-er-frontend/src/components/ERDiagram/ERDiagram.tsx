@@ -6,15 +6,20 @@ import RelationshipLine from './RelationshipLine';
 
 const DiagramContainer = styled.div`
   width: 100%;
-  height: 100%;
+  height: 100vh;
   position: relative;
-  overflow: auto;
+  overflow: hidden;
   background: linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
               linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
               linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
               linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
   background-size: 20px 20px;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  cursor: grab;
+  
+  &:active {
+    cursor: grabbing;
+  }
 `;
 
 const DiagramCanvas = styled.div`
@@ -22,6 +27,8 @@ const DiagramCanvas = styled.div`
   min-width: 1200px;
   min-height: 800px;
   padding: 50px;
+  user-select: none;
+  transform-origin: center center;
 `;
 
 const Title = styled.h1`
@@ -29,18 +36,23 @@ const Title = styled.h1`
   top: 20px;
   left: 20px;
   color: #ffffff;
-  font-size: 24px;
+  font-size: clamp(18px, 2.5vw, 24px);
   font-weight: bold;
   margin: 0;
   z-index: 1000;
+  pointer-events: none;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 `;
 
 const ERDiagram: React.FC = () => {
   const { entities, relationships } = useER();
   const canvasRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
 
-  // Espaçamento extra entre as caixas
+  // Espaçamento voltado ao valor anterior
   const EXTRA_SPACING = 80;
 
   // Calcular offset para centralizar as entidades considerando o espaçamento extra
@@ -69,11 +81,39 @@ const ERDiagram: React.FC = () => {
     return {
       ...entity,
       position: {
-        x: spacedX + offsetX + FINAL_SHIFT_X,
-        y: spacedY + offsetY + FINAL_SHIFT_Y,
+        x: spacedX + offsetX + FINAL_SHIFT_X + panOffset.x,
+        y: spacedY + offsetY + FINAL_SHIFT_Y + panOffset.y,
       },
     };
   });
+
+  // Função para ajustar o zoom automaticamente baseado no tamanho da tela
+  const adjustZoomForScreen = () => {
+    if (!canvasRef.current) return;
+    
+    const container = canvasRef.current;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    // Calcular o zoom ideal baseado no tamanho da tela
+    const idealScaleX = (containerWidth - 100) / 1200; // 100px de margem
+    const idealScaleY = (containerHeight - 100) / 800;
+    const idealScale = Math.min(idealScaleX, idealScaleY, 1); // Não aumentar além de 1
+    
+    setScale(Math.max(0.3, idealScale)); // Mínimo de 0.3
+  };
+
+  // Ajustar zoom quando a janela é redimensionada
+  useEffect(() => {
+    adjustZoomForScreen();
+    
+    const handleResize = () => {
+      adjustZoomForScreen();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Função para zoom com scroll do mouse
   useEffect(() => {
@@ -81,7 +121,7 @@ const ERDiagram: React.FC = () => {
       if (e.ctrlKey) {
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        setScale(prev => Math.max(0.5, Math.min(2, prev * delta)));
+        setScale(prev => Math.max(0.2, Math.min(2, prev * delta)));
       }
     };
 
@@ -92,8 +132,54 @@ const ERDiagram: React.FC = () => {
     }
   }, []);
 
+  // Função para arrastar o diagrama
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) { // Botão esquerdo do mouse
+      setIsDragging(true);
+      setDragStart({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      const deltaX = e.clientX - dragStart.x;
+      const deltaY = e.clientY - dragStart.y;
+      setPanOffset(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY,
+      }));
+      setDragStart({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  // Função para centralizar o diagrama
+  const centerDiagram = () => {
+    setPanOffset({ x: 0, y: 0 });
+    adjustZoomForScreen();
+  };
+
+  // Centralizar diagrama com duplo clique
+  const handleDoubleClick = () => {
+    centerDiagram();
+  };
+
   return (
-    <DiagramContainer ref={canvasRef}>
+    <DiagramContainer 
+      ref={canvasRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
+      onDoubleClick={handleDoubleClick}
+    >
       <Title>StackOverflow - Modelo Entidade-Relacionamento</Title>
       <DiagramCanvas style={{ transform: `scale(${scale})` }}>
         {/* Renderizar linhas de relacionamento primeiro (para ficarem atrás das entidades) */}

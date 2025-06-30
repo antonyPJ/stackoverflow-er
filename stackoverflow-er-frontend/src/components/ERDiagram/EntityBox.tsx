@@ -17,14 +17,17 @@ const EntityContainer = styled.div<{ color: string; isSelected: boolean; isQuery
   }};
   border-radius: 8px;
   min-width: 200px;
+  max-width: 250px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   transition: all 0.3s ease;
+  z-index: 10;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
     border-color: ${props => props.isQuerySelected ? '#4CAF50' : '#FFD700'};
+    z-index: 20;
   }
 `;
 
@@ -33,10 +36,11 @@ const EntityHeader = styled.div`
   padding: 12px;
   text-align: center;
   font-weight: bold;
-  font-size: 16px;
+  font-size: clamp(14px, 1.5vw, 16px);
   color: white;
   border-radius: 5px 5px 0 0;
   position: relative;
+  word-wrap: break-word;
 `;
 
 const SelectionIndicator = styled.div<{ isQuerySelected: boolean }>`
@@ -57,11 +61,27 @@ const SelectionIndicator = styled.div<{ isQuerySelected: boolean }>`
 
 const AttributesList = styled.div`
   padding: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
 `;
 
 const AttributeItem = styled.div<{ isPrimaryKey?: boolean; isForeignKey?: boolean }>`
   padding: 4px 8px;
-  font-size: 12px;
+  font-size: clamp(10px, 1.2vw, 12px);
   color: white;
   background-color: ${props => 
     props.isPrimaryKey ? 'rgba(255, 215, 0, 0.2)' : 
@@ -75,6 +95,7 @@ const AttributeItem = styled.div<{ isPrimaryKey?: boolean; isForeignKey?: boolea
   };
   margin: 2px 0;
   border-radius: 2px;
+  word-wrap: break-word;
   
   &:hover {
     background-color: rgba(255, 255, 255, 0.1);
@@ -87,8 +108,9 @@ const AttributeName = styled.span`
 
 const AttributeType = styled.span`
   color: #ccc;
-  font-size: 10px;
+  font-size: clamp(8px, 1vw, 10px);
   margin-left: 8px;
+  white-space: nowrap;
 `;
 
 const EntityBox: React.FC<EntityBoxProps> = ({ entity }) => {
